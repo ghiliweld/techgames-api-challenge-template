@@ -18,10 +18,62 @@ if (port == "") {
     process.exit(1);
 }
 
+// TODO: do typescript
+// TODO: status codes
+
+app.post('/articles', function (req, res) {
+  try {
+    let { title, subtitle, body, author } = req;
+    // TODO: implement ID
+    res.send({
+      _id,
+      title,
+      subtitle,
+      body,
+      author
+    });
+  } catch (error) {
+    // TODO: errors
+  }
+})
+
+app.put('/articles/{articleId}', function (req, res) {
+  try {
+    let { title, subtitle, body, author } = req;
+    // TODO: implement ID
+    // TODO: and do DB things
+    res.send({
+      _id,
+      title,
+      subtitle,
+      body,
+      author
+    });
+  } catch (error) {
+    // TODO: errors
+  }
+})
+
+app.delete('/articles/{articleId}', function (req, res) {
+  try {
+    // TODO: fetch article
+    res.send({
+      _id,
+      title,
+      subtitle,
+      body,
+      author
+    });
+  } catch (error) {
+    // a num but doesn't exist so return 404 or...
+    // NaN so return 400
+  }
+})
+
 app.get('/status', function (req, res) {
   res.send({
-    "status" : "Up"
-  })
+    status : "Up"
+  });
 })
 
 app.use((req: Request, res: Response) => {
