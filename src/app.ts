@@ -18,6 +18,12 @@ if (port == "") {
     process.exit(1);
 }
 
+app.get('/status', function (req, res) {
+  res.send({
+    "status" : "Up"
+  })
+})
+
 app.use((req: Request, res: Response) => {
     res.status(500).send({
         status: 500,
