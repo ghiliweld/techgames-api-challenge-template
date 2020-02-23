@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import cors from "cors";
 import { Application, Request, Response } from "express";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -21,11 +22,44 @@ if (port == "") {
 // TODO: do typescript
 // TODO: status codes
 
-app.post('/articles', function (req, res) {
+/// GET
+
+app.get('/articles', function (req: Request, res: Response) {
+  // TODO: fetch article from db
+  let articles = fetch_from_db() || []
+  res.status(200).send(articles);
+})
+
+app.get('/articles/:articleId', function (req: Request, res: Response) {
+  try {
+    let id = req.param('articleId')
+    if (id instanceof NaN) throw new Error('Invalid ID')
+    // TODO: fetch article from db
+    let article = fetch_from_db(articleId)
+    res.status(200).send(article);
+
+  } catch (error) {
+    if (error == 'Invalid ID') {
+      res.status(400).send({
+          status: 400,
+          message: "articleId is an invalid id"
+      });
+    } else {
+      res.status(404).send({
+          status: 404,
+          message: "Article does not exist"
+      });
+    }
+  }
+})
+
+
+/// POST
+app.post('/articles', function (req: Request, res: Response) {
   try {
     let { title, subtitle, body, author } = req;
     // TODO: implement ID
-    res.send({
+    res.status(200).send({
       _id,
       title,
       subtitle,
@@ -33,16 +67,21 @@ app.post('/articles', function (req, res) {
       author
     });
   } catch (error) {
-    // TODO: errors
+    res.status(400).send({
+        status: 400,
+        message: "Parameter missing from request body"
+    });
   }
 })
 
-app.put('/articles/{articleId}', function (req, res) {
+/// PUT
+app.put('/articles/:articleId', function (req: Request, res: Response) {
   try {
+    let id = req.param('articleId')
     let { title, subtitle, body, author } = req;
     // TODO: implement ID
     // TODO: and do DB things
-    res.send({
+    res.status(200).send({
       _id,
       title,
       subtitle,
@@ -50,14 +89,20 @@ app.put('/articles/{articleId}', function (req, res) {
       author
     });
   } catch (error) {
-    // TODO: errors
+    res.status(400).send({
+        status: 400,
+        message: "Parameter missing from request body"
+    });
   }
 })
 
-app.delete('/articles/{articleId}', function (req, res) {
+/// DELETE
+app.delete('/articles/:articleId', function (req: Request, res: Response) {
   try {
+    let id = req.param('articleId')
+    if (!(id instanceof ObjectID)) throw new Error('Invalid ID')
     // TODO: fetch article
-    res.send({
+    res.status(200).send({
       _id,
       title,
       subtitle,
@@ -65,12 +110,21 @@ app.delete('/articles/{articleId}', function (req, res) {
       author
     });
   } catch (error) {
-    // a num but doesn't exist so return 404 or...
-    // NaN so return 400
+    if (error == 'Invalid ID') {
+      res.status(400).send({
+          status: 400,
+          message: "articleId is an invalid id"
+      });
+    } else {
+      res.status(404).send({
+          status: 404,
+          message: "Article does not exist"
+      });
+    }
   }
 })
 
-app.get('/status', function (req, res) {
+app.get('/status', function (req: Request, res: Response) {
   res.send({
     status : "Up"
   });
