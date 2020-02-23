@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import cors from "cors";
 import { Application, Request, Response } from "express";
-import mongoose from "mongoose";
+import Model from "/db.js";
 
 dotenv.config();
 
@@ -26,8 +26,18 @@ if (port == "") {
 
 app.get('/articles', function (req: Request, res: Response) {
   // TODO: fetch article from db
-  let articles = fetch_from_db() || []
-  res.status(200).send(articles);
+  let doc = Model.findById(id) || []
+  if (doc == []) {
+    res.status(200).send([]);
+  } else {
+    res.status(200).send({
+      doc._id,
+      doc.title,
+      doc.subtitle,
+      doc.body,
+      doc.author
+    });
+  }
 })
 
 app.get('/articles/:articleId', function (req: Request, res: Response) {
@@ -35,8 +45,14 @@ app.get('/articles/:articleId', function (req: Request, res: Response) {
     let id = req.param('articleId')
     if (id instanceof NaN) throw new Error('Invalid ID')
     // TODO: fetch article from db
-    let article = fetch_from_db(articleId)
-    res.status(200).send(article);
+    let doc = Model.findById(id)
+    res.status(200).send({
+      doc._id,
+      doc.title,
+      doc.subtitle,
+      doc.body,
+      doc.author
+    });
 
   } catch (error) {
     if (error == 'Invalid ID') {
@@ -57,14 +73,15 @@ app.get('/articles/:articleId', function (req: Request, res: Response) {
 /// POST
 app.post('/articles', function (req: Request, res: Response) {
   try {
-    let { title, subtitle, body, author } = req;
-    // TODO: implement ID
+    let doc = new Model(req);
+    doc.save();
+
     res.status(200).send({
-      _id,
-      title,
-      subtitle,
-      body,
-      author
+      doc._id,
+      doc.title,
+      doc.subtitle,
+      doc.body,
+      doc.author
     });
   } catch (error) {
     res.status(400).send({
@@ -78,9 +95,14 @@ app.post('/articles', function (req: Request, res: Response) {
 app.put('/articles/:articleId', function (req: Request, res: Response) {
   try {
     let id = req.param('articleId')
-    let { title, subtitle, body, author } = req;
-    // TODO: implement ID
-    // TODO: and do DB things
+
+    Model.updateOne({ _id: id }, req, function(err) {
+      // Updated at most one doc, `res.modifiedCount` contains the number
+      // of docs that MongoDB updated
+      if (err) throw new Error();
+
+    });
+
     res.status(200).send({
       _id,
       title,
@@ -101,13 +123,16 @@ app.delete('/articles/:articleId', function (req: Request, res: Response) {
   try {
     let id = req.param('articleId')
     if (!(id instanceof ObjectID)) throw new Error('Invalid ID')
-    // TODO: fetch article
+
+    let doc = Model.findById(id)
+    Model.deleteOne({ _id: id });
+
     res.status(200).send({
-      _id,
-      title,
-      subtitle,
-      body,
-      author
+      doc._id,
+      doc.title,
+      doc.subtitle,
+      doc.body,
+      doc.author
     });
   } catch (error) {
     if (error == 'Invalid ID') {
