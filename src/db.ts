@@ -1,4 +1,3 @@
-// TODO: Create Schema and model
 
 import mongoose from "mongoose";
 
